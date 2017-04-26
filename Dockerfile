@@ -1,47 +1,59 @@
 # Main Image
-FROM node:6.10.2-wheezy
+FROM buildpack-deps:wheezy
+MAINTAINER Jan Sanchez <joejansanchez@gmail.com>
 
-# Environment Variables
-ENV VERSION 0.1
-ENV USER node
-ENV APP_NAME app
+# gpg keys listed at https://github.com/nodejs/node#release-team
+RUN set -ex \
+  && for key in \
+    9554F04D7259F04124DE6B476D5A82AC7E37093B \
+    94AE36675C464D64BAFA68DD7434390BDBE9B9C5 \
+    FD3A5288F042B6850C66B31F09FE44734EB7990E \
+    71DCFD284A79C3B38668286BC97EC7A07EDE3FC1 \
+    DD8F2338BAE7501E3DD5AC78C273792F7D83545D \
+    B9AE9905FFD7803F25714661B63B535A4C206CA9 \
+    C4F0DFFF4E8C1A8236409D08E73BC641CC11F4C8 \
+    56730D5401028683275BD23C23EFEFE93C4CFFFE \
+  ; do \
+    gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" || \
+    gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
+    gpg --keyserver keyserver.pgp.com --recv-keys "$key" ; \
+  done
+
+ENV NPM_CONFIG_LOGLEVEL info
+ENV NODE_VERSION 6.10.2
+
+RUN curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.xz" \
+  && curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc" \
+  && gpg --batch --decrypt --output SHASUMS256.txt SHASUMS256.txt.asc \
+  && grep " node-v$NODE_VERSION-linux-x64.tar.xz\$" SHASUMS256.txt | sha256sum -c - \
+  && tar -xJf "node-v$NODE_VERSION-linux-x64.tar.xz" -C /usr/local --strip-components=1 \
+  && rm "node-v$NODE_VERSION-linux-x64.tar.xz" SHASUMS256.txt.asc SHASUMS256.txt \
+  && ln -s /usr/local/bin/node /usr/local/bin/nodejs
+
+ENV YARN_VERSION 0.23.2
+
+RUN set -ex \
+  && for key in \
+    6A010C5166006599AA17F08146C2130DFD2497F5 \
+  ; do \
+    gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" || \
+    gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
+    gpg --keyserver keyserver.pgp.com --recv-keys "$key" ; \
+  done \
+  && curl -fSL -o yarn.js "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-legacy-$YARN_VERSION.js" \
+  && curl -fSL -o yarn.js.asc "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-legacy-$YARN_VERSION.js.asc" \
+  && gpg --batch --verify yarn.js.asc yarn.js \
+  && rm yarn.js.asc \
+  && mv yarn.js /usr/local/bin/yarn \
+  && chmod +x /usr/local/bin/yarn
 
 # Paths
 ENV YARN_PATH /tmp/cache/yarn/
-ENV USER_PATH /home/$USER/
-ENV APP_PATH $USER_PATH$APP_NAME/
-
-# Switch to $USER
-USER $USER
-
-# Feed my bash history
-RUN echo "cd ${APP_PATH}" >> $USER_PATH.bash_history
-RUN echo "ls -la" >> $USER_PATH.bash_history
-
-# Add ps1
-ADD ./files/ps1 /tmp/ps1
-
-# If don't want colors then comment the two lines below...
-RUN sed -i '1s/^/force_color_prompt=yes \n/' $USER_PATH.bashrc
-RUN cat /tmp/ps1 >> $USER_PATH.bashrc
 
 # Yarn Configuration
 RUN mkdir -p $YARN_PATH \
     && chmod -R 775 $YARN_PATH \
     && yarn config set cache-folder $YARN_PATH
 
-# App Folder
-RUN mkdir -p $APP_PATH \
-    && chmod -R 775 $APP_PATH
-
-# Set Workdir
-WORKDIR $APP_PATH
-
-# Expose default port
-EXPOSE 3000
-
-# Exec node
-CMD node
-
 # For run a container and start a Bash session use 'bash' or /bin/bash
-# i.e. docker run -it --rm image_name bash
+# i.e. docker run -it --rm jansanchez/nocker-wheezy bash
