@@ -9,38 +9,7 @@ docker run -it --rm jansanchez/nocker-wheezy bash
 
 ## How to use with Docker Compose
 
-### Dockerfile
-```
-
-```
-
-### build.yml
-```
-
-```
-
-### install.yml
-```
-
-```
-
-### package.json
-```
-
-```
-
-### docker-compose.yml
-```
-
-```
-
-
-### I'm working in that...
-
-## Run in a "nodejs" container
-```
-docker run -it --name nodejs jansanchez/nocker-wheezy bash
-```
+[https://github.com/jansanchez/nocker-app](https://github.com/jansanchez/nocker-app)
 
 # **If you want your Own Build**
 
