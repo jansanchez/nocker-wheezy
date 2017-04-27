@@ -9,7 +9,7 @@ docker run -it --rm jansanchez/nocker-wheezy bash
 
 ## How to use with Docker Compose (Template and Example)
 
-[https://github.com/jansanchez/nocker-app](https://github.com/jansanchez/nocker-app)
+Example: [https://github.com/jansanchez/nocker-wheezy-app](https://github.com/jansanchez/nocker-wheezy-app)
 
 # **If you want your Own Build**
 
