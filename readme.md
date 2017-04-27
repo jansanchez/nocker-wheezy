@@ -7,7 +7,7 @@ An Image for Node.js based in Debian Wheezy
 docker run -it --rm jansanchez/nocker-wheezy bash
 ```
 
-## How to use with Docker Compose
+## How to use with Docker Compose (Template and Example)
 
 [https://github.com/jansanchez/nocker-app](https://github.com/jansanchez/nocker-app)
 
